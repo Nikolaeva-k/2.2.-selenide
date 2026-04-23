@@ -1,5 +1,6 @@
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 
 public class cardDeliveryTest {
 
@@ -38,5 +40,31 @@ public class cardDeliveryTest {
                 .should(Condition.visible, Duration.ofSeconds(15))
                 .should(Condition.text("Встреча успешно забронирована на " + planningDate));
 
+    }
+
+    @Test
+    void shouldBeSuccessWithAuto(){
+        $("[data-test-id='city'] input").setValue("Сан");
+        $$(".menu-item__control")
+                .find(Condition.text("Санкт-Петербург"))
+                .click();
+
+        LocalDate date = LocalDate.now().plusDays(7);
+        $("[data-test-id='date'] input")
+                .click();
+        if (date.getMonthValue() != LocalDate.now().getMonthValue()) {
+            $("[data-step='1'")
+                    .click();
+        }
+        $$(".calendar__day")
+                .findBy(Condition.text(String.valueOf(date.getDayOfMonth())))
+                .click();
+        $("[data-test-id='name'] input").setValue("Мандаринов Александр");
+        $("[data-test-id='phone'] input").setValue("+79999999999");
+        $("[data-test-id='agreement']").click();
+        $("button.button").click();
+        $(".notification__content")
+                .should(Condition.visible, Duration.ofSeconds(15))
+                .should(Condition.text("Встреча успешно забронирована на " + date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))));
     }
 }
